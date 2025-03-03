@@ -1,0 +1,91 @@
+specification {
+    element person {
+        style {
+            shape person
+            color green
+        }
+    }
+    element softwareSystem
+    element container
+    element component
+}
+
+model {
+  user = person "Пользователь" "Пользователь социальной сети"
+
+  socialNetwork = softwareSystem "Социальная сеть" {
+    apiGateway = container "API Gateway" {
+      description "REST API для UI и перенаправление запросов в другие сервисы"
+      technology "Python"
+    }
+
+    userService = container "User Service" {
+      description "Хранение информации о пользователях и аутентификация"
+      technology "Python"
+    }
+
+    postsService = container "Posts Service" {
+      description "Управление постами, лайками и комментариями"
+      technology "Python"
+    }
+
+    statisticsService = container "Statistics Service" {
+      description "Сбор и анализ статистики по постам"
+      technology "Python"
+    }
+
+    postgresDbUsers = container "PostgreSQL" {
+      description "Хранение данных пользователей"
+      technology "Database"
+      style {
+        shape cylinder
+      }
+    }
+
+    cassandraDbPosts = container "Cassandra" {
+      description "Хранение постов и комментариев"
+      technology "Database"
+      style {
+        shape cylinder
+      }
+    }
+
+    clickhouseDb = container "ClickHouse" {
+      description "Хранение аналитических данных"
+      technology "Database"
+      style {
+        shape cylinder
+      }
+    }
+
+    kafka = container "Kafka" {
+      description "Обмен событиями между сервисами"
+      technology "Message Broker"
+      style {
+        shape queue
+      }
+    }
+  }
+
+  user -> socialNetwork.apiGateway "Использует HTTPS"
+  socialNetwork.apiGateway -> socialNetwork.userService "Аутентификация и обновление данных пользователя JSON/HTTPS"
+  socialNetwork.apiGateway -> socialNetwork.postsService "CRUD (посты, лайки, комментарии) JSON/HTTPS"
+  socialNetwork.apiGateway -> socialNetwork.statisticsService "Запрашивает аналитику действий пользователя JSON/HTTPS"
+
+  socialNetwork.userService -> socialNetwork.postgresDbUsers "Читает/Пишет SQL"
+  socialNetwork.postsService -> socialNetwork.cassandraDbPosts "Читает/Пишет CQL"
+  socialNetwork.statisticsService -> socialNetwork.clickhouseDb "Читает/Пишет SQL"
+  
+  socialNetwork.apiGateway -> socialNetwork.kafka "Публикует события о просмотрах"
+  socialNetwork.postsService -> socialNetwork.kafka "Публикует"
+  socialNetwork.statisticsService -> socialNetwork.kafka "Подписывается"
+}
+
+views {
+  view index {
+    include *
+  }
+  view of socialNetwork {
+    include *
+  }
+}
