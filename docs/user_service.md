@@ -7,8 +7,8 @@ erDiagram
     users {
         uuid id PK
         string username
-        string email
         string password_hash
+        string email
         datetime created_at
         datetime updated_at
     }
@@ -29,5 +29,4 @@ erDiagram
         string user_agent
         datetime created_at
         datetime expires_at
-        string ip_address
     }
