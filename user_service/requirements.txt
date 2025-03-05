@@ -8,3 +8,10 @@ python-multipart
 alembic
 asyncpg
 pydantic-settings
+
+pytest
+pytest-asyncio
+httpx
+freezegun
+pytest-cov
+factory_boy
