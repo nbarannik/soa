@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - user_network
+
+  user_service:
+    build:
+      context: ./user_service
+    environment:
+      DATABASE_URL: postgresql+asyncpg://user:password@postgres:5432/user_db
+    ports:
+      - "8001:8000"
+    depends_on:
+      - postgres
+    networks:
+      - user_network
+
+  api_gateway:
+    build:
+      context: ./api_gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - user_service
+    networks:
+      - user_network
+
+networks:
+  user_network:
+
+volumes:
+  postgres_data:
