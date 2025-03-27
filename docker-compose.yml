@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: user_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -26,13 +26,43 @@ services:
     networks:
       - user_network
 
+  post_service_db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: post_user
+      POSTGRES_PASSWORD: post_password
+      POSTGRES_DB: post_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - post_service_data:/var/lib/postgresql/data
+    networks:
+      - user_network
+
+  post_service:
+    build:
+      context: ./post_service
+    environment:
+      POSTGRES_URL: postgresql://post_user:post_password@post_service_db:5432/post_db
+    ports:
+      - "50051:50051"
+    depends_on:
+      - post_service_db
+    networks:
+      - user_network
+
   api_gateway:
     build:
       context: ./api_gateway
+    environment:
+      POST_SERVICE_GRPC_HOST: post_service
+      POST_SERVICE_GRPC_PORT: 50051
+      USER_SERVICE_URL: http://user_service:8000
     ports:
       - "8000:8000"
     depends_on:
       - user_service
+      - post_service
     networks:
       - user_network
 
@@ -41,3 +71,4 @@ networks:
 
 volumes:
   postgres_data:
+  post_service_data:
