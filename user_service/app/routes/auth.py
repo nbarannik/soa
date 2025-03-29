@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, Depends
 from .. import schemas, crud
-from .dependencies import get_current_user, create_access_token
+from .dependencies import create_access_token, validate_user_token
 
 router = APIRouter()
 
@@ -21,6 +21,10 @@ async def login(response: Response, user_login: schemas.LoginRequest):
     return {"session_token": session_token}
 
 @router.post("/logout")
-async def logout_user(response: Response):
+async def logout(response: Response):
     response.delete_cookie(key="users_access_token")
     return {'message': 'User logout successfully'}
+
+@router.get("/auth")
+async def auth(user_id: str = Depends(validate_user_token)):
+    return user_id

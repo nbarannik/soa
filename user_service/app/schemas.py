@@ -34,3 +34,6 @@ class UserResponse(BaseModel):
 
 class SessionToken(BaseModel):
     session_token: str
+
+class AuthResponse(BaseModel):
+    user_id: str
